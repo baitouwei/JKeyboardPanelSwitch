@@ -125,17 +125,12 @@ public class CustomRootLayout extends LinearLayout implements ViewTreeObserver.O
                 break;
             }
 
-            // 检测到真正的 由于键盘收起触发了本次的布局变化
-
-            if (offset > 0) {
-                //键盘弹起 (offset > 0，高度变小)
-                bottom.setIsHide(true);
-            } else if (mIsKeyboardShowing) {
-                // 1. 总得来首，在监听到键盘已经显示的前提下，键盘收回才是有效有意义的。
-                // 2. 修复在Android L下使用V7.Theme.AppCompat主题，进入Activity，默认弹起面板bug，
-                // 第2点的bug出现原因:在Android L下使用V7.Theme.AppCompat主题，并且不使用系统的ActionBar/ToolBar，V7.Theme.AppCompat主题,还是会先默认绘制一帧默认ActionBar，然后再将他去掉（略无语）
-                //键盘收回 (offset < 0，高度变大)
-                bottom.setIsShow(true);
+            //检测到真正的 由于键盘收起触发了本次的布局变化
+            //程序走到这里，键盘已经消失或者隐藏了，可以开始对 PanelLayout 进行隐藏或消失
+            if (bottom.isShow()) {
+                bottom.setVisibility(VISIBLE);
+            } else {
+                bottom.setVisibility(GONE);
             }
 
         } while (false);
@@ -170,16 +165,13 @@ public class CustomRootLayout extends LinearLayout implements ViewTreeObserver.O
 
     }
 
-    private boolean mIsKeyboardShowing = false;
-
     protected void onKeyboardShowing(final boolean isShowing) {
-        if (this.mIsKeyboardShowing == isShowing) {
+        PanelLayout panelLayout = getPanelLayout(this);
+        if (panelLayout.isKeyboardShowing() == isShowing) {
             return;
         }
 
-        this.mIsKeyboardShowing = isShowing;
-        getPanelLayout(this).setIsKeyboardShowing(isShowing);
-
+        getPanelLayout(this).setKeyboardShowing(isShowing);
         if (mKeyboardShowingListener != null) {
             mKeyboardShowingListener.onKeyboardShowing(isShowing);
         }
@@ -265,10 +257,10 @@ public class CustomRootLayout extends LinearLayout implements ViewTreeObserver.O
         /**
          * Keyboard showing state callback method.
          * <p>
-         *     This method is invoked in {@link View#layout(int, int, int, int)} which is one of the
-         *     View's draw lifecycle callback methods, and it should be focused on caculating view's
-         *     left, top, right, bottom. So avoiding those time-consuming operation(I/O, complex caculation,
-         *     alloc objects, etc.) here from blocking main ui thread is recommended.
+         * This method is invoked in {@link View#layout(int, int, int, int)} which is one of the
+         * View's draw lifecycle callback methods, and it should be focused on caculating view's
+         * left, top, right, bottom. So avoiding those time-consuming operation(I/O, complex caculation,
+         * alloc objects, etc.) here from blocking main ui thread is recommended.
          * </p>
          *
          * @param isShowing Indicate whether keyboard is showing or not.

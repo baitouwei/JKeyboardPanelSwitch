@@ -19,7 +19,6 @@ import android.annotation.TargetApi;
 import android.content.Context;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -31,8 +30,7 @@ import cn.dreamtobe.kpswitch.util.KeyboardUtil;
  */
 public class PanelLayout extends LinearLayout {
 
-    private boolean mIsHide = false;
-    private boolean mIsShow = true;
+    private boolean mIsShow = false;
 
     public PanelLayout(Context context) {
         super(context);
@@ -79,58 +77,32 @@ public class PanelLayout extends LinearLayout {
         });
     }
 
-
     /**
-     * @param visibility {@link View#VISIBLE}: 这里有两种情况，1. 键盘没有弹起(需要适配)、2. 键盘没有弹起（不用适配）
-     */
-    @Override
-    public void setVisibility(int visibility) {
-        if (visibility == VISIBLE) {
-            this.mIsHide = false;
-        }
-
-        if (visibility == getVisibility()) {
-            return;
-        }
-
-
-        if (mIsKeyboardShowing && visibility == VISIBLE) {
-            return;
-        }
-
-        super.setVisibility(visibility);
-
-    }
-
-    @Override
-    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        if (mIsHide) {
-            setVisibility(View.GONE);
-            widthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY);
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.EXACTLY);
-        }
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
-    }
-
-    /**
-     * 这里只是一个状态，是在{@link #onMeasure}之前{@link CustomRootLayout#onLayout(boolean, int, int, int, int)}中获知
+     * 键盘是否显示，从{@link CustomRootLayout#onLayout(boolean, int, int, int, int)}中获知
      */
     private boolean mIsKeyboardShowing = false;
 
-    public void setIsKeyboardShowing(final boolean isKeyboardShowing) {
+    public void setKeyboardShowing(final boolean isKeyboardShowing) {
         this.mIsKeyboardShowing = isKeyboardShowing;
     }
 
+    public boolean isKeyboardShowing() {
+        return mIsKeyboardShowing;
+    }
 
-    public void setIsShow(final boolean isShow) {
-        this.mIsShow = isShow;
-        if (mIsShow) {
-            super.setVisibility(View.VISIBLE);
+    public void hide() {
+        mIsShow = false;
+    }
+
+    public void show() {
+        mIsShow = true;
+        //面板和键盘都未显示的时候
+        if (!mIsKeyboardShowing && mIsShow) {
+            setVisibility(VISIBLE);
         }
     }
 
-    public void setIsHide(final boolean isHide) {
-        this.mIsHide = isHide;
+    public boolean isShow() {
+        return mIsShow;
     }
-
 }

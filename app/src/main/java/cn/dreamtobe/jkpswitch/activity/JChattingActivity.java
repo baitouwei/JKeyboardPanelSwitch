@@ -41,9 +41,10 @@ public class JChattingActivity extends AppCompatActivity {
     public void onClickPlusIv(final View view) {
         if (mPanelRoot.getVisibility() == View.VISIBLE) {
             KeyboardUtil.showKeyboard(mSendEdt);
+            mPanelRoot.hide();
         } else {
             KeyboardUtil.hideKeyboard(mSendEdt);
-            mPanelRoot.setVisibility(View.VISIBLE);
+            mPanelRoot.show();
         }
     }
 
